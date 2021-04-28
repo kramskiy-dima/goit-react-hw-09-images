@@ -1,41 +1,44 @@
-import { Component } from 'react';
+import { useCallback, useEffect } from 'react';
 import s from './Modal.module.css';
 import PropTypes from 'prop-types';
 
-class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleEscDown);
-  }
+export default function Modal({ link, toogleModal }) {
+  const handleEscDown = useCallback(
+    e => {
+      if (e.code === 'Escape') {
+        toogleModal();
+      }
+    },
+    [toogleModal],
+  );
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleEscDown);
-  }
+  const handleBackdropClick = useCallback(
+    event => {
+      if (event.currentTarget === event.target) {
+        toogleModal();
+      }
+    },
+    [toogleModal],
+  );
 
-  handleEscDown = e => {
-    if (e.code === 'Escape') {
-      this.props.toogleModal();
-    }
-  };
+  useEffect(() => {
+    window.addEventListener('keydown', handleEscDown);
 
-  handleBackdropClick = event => {
-    if (event.currentTarget === event.target) {
-      this.props.toogleModal();
-    }
-  };
-  render() {
-    return (
-      <div className={s.Overlay} onClick={this.handleBackdropClick}>
-        <div className={s.Modal}>
-          <img src={this.props.link} alt="" />
-        </div>
+    return () => {
+      window.removeEventListener('keydown', handleEscDown);
+    };
+  }, [handleEscDown]);
+
+  return (
+    <div className={s.Overlay} onClick={handleBackdropClick}>
+      <div className={s.Modal}>
+        <img src={link} alt="" />
       </div>
-    );
-  }
+    </div>
+  );
 }
 
 Modal.propTypes = {
   link: PropTypes.string.isRequired,
   toogleModal: PropTypes.func.isRequired,
 };
-
-export default Modal;
